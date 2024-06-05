@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+      main {
+        padding: 50px;
+      }
+    </style>
+  </head>
+  <body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+
+  <main>
+    <h1>Asignacion de permisos</h1>
+    <form hx-get="/asignarPermiso" hx-swap="innerHTML" hx-target="#contenedor">
+      <label for="codigo">Usuario: <input id="codigo" name="codigo" /></label>
+      <button>Buscar</button>
+    </form>
+    <div id="contenedor"></div>
+  </main>
+  </body>
+</html>

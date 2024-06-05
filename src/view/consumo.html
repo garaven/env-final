@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Consumo mensual</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <style>
+
+    @import url('https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Reddit Mono', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f7f7f7; /* Fondo gris claro */
+    }
+    
+    main {
+      max-width: 800px;
+      margin: 20px auto; /* Alineación central y margen superior e inferior */
+      padding: 20px;
+      background-color: #fff; /* Fondo blanco */
+      border-radius: 8px; /* Bordes redondeados */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    td[contenteditable="true"] {
+      white-space: nowrap;
+    }
+
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    
+    th, td {
+      border: 1px solid #ddd; /* Borde gris claro */
+      padding: 8px;
+      text-align: left;
+    }
+    
+    th {
+      background-color: #f2f2f2; /* Fondo gris */
+    }
+    
+    th:first-child, td:first-child {
+      width: 10%;
+    }
+    
+    td:last-child {
+      text-align: center;
+      border: none;
+    }
+    
+    button {
+      cursor: pointer;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      color: white;
+      transition: background-color 0.3s;
+      margin-right: 10px;
+    }
+    
+    button:hover {
+      background-color: #261c4c; /* Verde más oscuro al pasar el mouse */
+    }
+    
+    button:disabled {
+      background-color: #cccccc; /* Gris claro */
+      cursor: not-allowed;
+    }
+
+    .editar {
+      background-color: rebeccapurple;
+    }
+
+    .guardar {
+      margin-top: 10px;
+      background-color: royalblue;
+    }
+
+    /* Estilo replicado */
+    /* Estilos del formulario */
+    form {
+      display: flex;
+      flex-direction: column;
+      max-width: 350px;
+      border: 3px solid #000;
+      border-radius: 5px;
+      margin: 0 auto; /* Alineación central */
+      padding: 20px;
+      background-color: #fff; /* Fondo blanco */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+    }
+
+    li label {
+      display: block;
+      cursor: pointer;
+      height: 100%;
+      font-size: smaller;
+    }
+
+    label + input {
+      display: block;
+      font-size: medium;
+      margin-top: 10px;
+      width: 100%;
+      padding: 2px;
+    }
+
+    #contenedor {
+      border-top: 1.5px solid #000;
+      padding: 30px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    #contenedor div:nth-child(2) {
+      margin-top: 15px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      cursor: pointer;
+      padding: 10px 0;
+      width: 100%;
+      border: 1.5px solid #000;
+      border-radius: 3px;
+      color: #fff;
+      background-color: #457b9d;
+      font-weight: 600;
+    }
+  </style> 
+  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+
+  <main>
+    <header>
+      <h1>Consumo mensual</h1>
+    </header>
+    <section>
+      <table id="table">
+        <thead>
+          <tr>
+            <th>Día</th>
+            <th>Consumo</th>
+            <th>Dispositivos</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody hx-get="/datosTabla" hx-trigger="load">
+        </tbody>
+      </table>
+    </section>
+    <section>
+      <h2 id="totalConsumo">Total: 0 kWh</h2>
+      <button onclick="limpiarTabla()">Limpiar</button>
+      <!-- <button onclick="generarPDF()">PDF</button>
+      <button onclick="enviarTabla()">Enviar</button> -->
+    </section>
+  </main>
+
+  <script>
+    const tbody = document.querySelector('tbody');
+    let totalConsumo = 0;
+
+    // for (let i = 1; i <= 31; i++) {
+    //   const fila = document.createElement('tr');
+
+    //   const celdaNumero = document.createElement('td');
+    //   celdaNumero.textContent = i;
+    //   fila.appendChild(celdaNumero);
+
+    //   for (let j = 0; j < 3; j++) {
+    //     const celda = document.createElement('td');
+    //     fila.appendChild(celda);
+    //   }
+
+    //   const ultimaCelda = document.createElement('td');
+    //   const botonEditar = document.createElement('button');
+    //   botonEditar.textContent = 'Editar';
+    //   botonEditar.addEventListener('click', () => editarFila(botonEditar));
+    //   const botonGuardar = document.createElement('button');
+    //   botonGuardar.textContent = 'Guardar';
+    //   botonGuardar.addEventListener('click', () => guardarEdicion(botonGuardar));
+    //   ultimaCelda.appendChild(botonEditar);
+    //   ultimaCelda.appendChild(botonGuardar);
+    //   fila.appendChild(ultimaCelda);
+
+    //   tbody.appendChild(fila);
+    // }
+
+function editarFila(button) {
+  const fila = button.closest('tr');
+  const celdas = fila.querySelectorAll('td:not(:last-child):not(:first-child):not(:nth-child(4))');
+
+  celdas.forEach(celda => {
+    celda.contentEditable = "true";
+    celda.style.backgroundColor = '#dfdfdf';
+  });  
+}
+
+function guardarEdicion(button) {
+  const fila = button.closest('tr');
+  const consumoCelda = fila.querySelector('td:nth-child(2)');
+  const consumo = parseFloat(consumoCelda.textContent) || 0;
+
+  const dispositivosCelda = fila.querySelector('td:nth-child(3)'); // Obtener la celda de dispositivos
+  const dispositivos = dispositivosCelda.textContent.trim(); // Obtener el valor de dispositivos
+
+  totalConsumo += consumo;
+  actualizarTotalConsumo();
+  
+  const celdas = fila.querySelectorAll('td');
+  celdas.forEach(celda => {
+    celda.contentEditable = "false";
+    celda.style.backgroundColor = '#fff';
+  });
+
+  const celdaFecha = fila.querySelector('td:nth-child(4)');
+  const fecha = celdaFecha.innerHTML; // Obtener la fecha
+
+  // Realizar la petición GET a /ingresarFila con los datos de la fila
+  const url = `/ingresarFila?cantidad=${consumo}&dispositivos=${dispositivos}&fecha=${fecha}`; 
+  fetch(url)
+    .then(response => {
+      if (response.ok) {
+        console.log('Todo ok! xd')
+      } else {
+        console.error('Error al ingresar la fila:', response.statusText);
+      }
+    })
+    .catch(error => {
+      console.error('Error en la solicitud:', error);
+    });
+}
+
+
+function actualizarTotalConsumo() {
+  const filas = document.querySelectorAll('#table tbody tr');
+  totalConsumo = 0
+
+  filas.forEach(fila => {
+    const consumoCelda = fila.querySelector('td:nth-child(2)');
+    const consumo = parseFloat(consumoCelda.textContent) || 0;
+    totalConsumo += consumo;
+  });
+
+  const totalConsumoElemento = document.getElementById('totalConsumo');
+  totalConsumoElemento.textContent = `Total: ${totalConsumo.toFixed(2)} kWh`;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(actualizarTotalConsumo, 500);
+});
+
+function generarPDF() {
+  // Crear un nuevo documento PDF
+  const doc = new jsPDF();
+
+  // Agregar título
+  doc.text('Gráficos de consumo mensual', 10, 10);
+
+  // Crear un gráfico de líneas
+  const canvasLineas = document.createElement('canvas');
+  canvasLineas.width = 400;
+  canvasLineas.height = 200;
+  const ctxLineas = canvasLineas.getContext('2d');
+
+  // Crear datos de ejemplo para el gráfico de líneas
+  const datosLineas = {
+    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+    datasets: [{
+      label: 'Consumo mensual (kWh)',
+      data: [50, 60, 70, 65, 80, 75], // Datos de consumo mensual
+      backgroundColor: 'rgba(255, 99, 132, 0.2)',
+      borderColor: 'rgba(255, 99, 132, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Generar el gráfico de líneas
+  new Chart(ctxLineas, {
+    type: 'line',
+    data: datosLineas,
+    options: {}
+  });
+
+  // Agregar el gráfico de líneas al PDF
+  const imgDataLineas = canvasLineas.toDataURL('image/png');
+  doc.addImage(imgDataLineas, 'PNG', 10, 20, 200, 100);
+
+  // Crear un gráfico de barras
+  const canvasBarras = document.createElement('canvas');
+  canvasBarras.width = 400;
+  canvasBarras.height = 200;
+  const ctxBarras = canvasBarras.getContext('2d');
+
+  // Crear datos de ejemplo para el gráfico de barras
+  const datosBarras = {
+    labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
+    datasets: [{
+      label: 'Consumo mensual (kWh)',
+      data: [50, 60, 70, 65, 80, 75], // Datos de consumo mensual
+      backgroundColor: 'rgba(54, 162, 235, 0.2)',
+      borderColor: 'rgba(54, 162, 235, 1)',
+      borderWidth: 1
+    }]
+  };
+
+  // Generar el gráfico de barras
+  new Chart(ctxBarras, {
+    type: 'bar',
+    data: datosBarras,
+    options: {}
+  });
+
+  // Agregar el gráfico de barras al PDF
+  const imgDataBarras = canvasBarras.toDataURL('image/png');
+  doc.addImage(imgDataBarras, 'PNG', 10, 130, 200, 100);
+
+  // Agregar el consumo total al PDF
+  doc.text(`Consumo total: ${totalConsumo.toFixed(2)} kWh`, 10, 250);
+
+  // Guardar el PDF
+  doc.save('consumo_mensual.pdf');
+}
+
+    function enviarTabla() {
+      alert('Tabla enviada');
+    }
+
+    function limpiarTabla() {
+      const filas = document.querySelectorAll('#table tbody tr');
+
+      filas.forEach(fila => {
+        const celdas = fila.querySelectorAll('td:not(:first-child):not(:last-child)');
+        celdas.forEach((celda, index) => {
+          celda.textContent = ''
+        });
+      });
+      totalConsumo = 0;
+      actualizarTotalConsumo();
+    }
+  </script>
+</body>
+</html>

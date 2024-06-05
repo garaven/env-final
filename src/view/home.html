@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+
+  <style>
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+    <main>
+      <h1>Bienvenido</h1>
+      <h2 id="nombre" hx-get="/infoUsuario/nombre" hx-trigger="load" hx-swap="innerHTML"></h2>
+    </main>
+</body>
+</html>

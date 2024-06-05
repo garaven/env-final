@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chat</title>
+    <script defer src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+
+    <script type="module">
+      import { io } from "https://cdn.socket.io/4.3.2/socket.io.esm.min.js";
+      const socket = io({
+        auth: {
+          serverOffset: 0,
+        },
+      });
+
+      const form = document.getElementById("form");
+      const input = document.getElementById("input");
+      const mensajes = document.getElementById("mensajes");
+
+      document.addEventListener("htmx:load", () => {
+        mensajes.scrollTop = mensajes.scrollHeight;
+      });
+
+      socket.on("chat message", (data) => {
+        const nombreUsuario = data.username;
+        const mensaje = data.message;
+        const codigo = data.code;
+        const item = `<li><div><strong>${nombreUsuario}</strong></div>${mensaje}</li>`;
+        mensajes.insertAdjacentHTML("beforeend", item);
+        mensajes.scrollTop = mensajes.scrollHeight;
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        if (input.value) {
+          socket.emit("chat message", input.value);
+          input.value = "";
+        }
+      });
+    </script>
+    <style>
+      #chat {
+        position: relative;
+        height: 450px;
+        width: 310px;
+        border-radius: 5px;
+        box-shadow: 0 0 5px #cbcbcb;
+        padding: 15px;
+      }
+
+      #mensajes {
+        height: 90%;
+        overflow-y: scroll;
+        padding: 0;
+        margin: 0;
+      }
+
+      strong {
+        color: royalblue;
+      }
+
+      em {
+        color: gray;
+      }
+
+      #form {
+        position: absolute;
+        bottom: 10px;
+        left: 10px;
+      }
+
+      #form input {
+        font-size: large;
+        padding: 5px;
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 0 5px #cbcbcb;
+      }
+
+      #form button {
+        cursor: pointer;
+        font-weight: 600;
+        padding: 8px;
+        border-radius: 10px;
+        border: none;
+        background-color: royalblue;
+        color: #fff;
+        box-shadow: 0 0 5px #cbcbcb;
+      }
+
+      #mensajes li {
+        max-width: 90%;
+        list-style: none;
+        margin: 5px 0;
+        padding: 5px 10px;
+        background-color: #f0f0f0;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      main {
+        padding: 0 50px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      hx-get="/nav"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+      hx-target="this"
+    ></div>
+
+    <main>
+      <header>
+        <h1>Chat</h1>
+      </header>
+      <section id="chat">
+        <ul
+          id="mensajes"
+          hx-get="/historial"
+          hx-trigger="load"
+          hx-swap="innerHTML"
+        ></ul>
+        <form id="form">
+          <input
+            type="text"
+            name="mensaje"
+            id="input"
+            placeholder="Escribe un mensaje"
+            autocomplete="off"
+          />
+          <button type="submit">Enviar</button>
+        </form>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objetivos | Empleado</title>
+  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    main {
+      padding: 50px;
+    }
+  </style>
+</head>
+<body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+
+  <main>
+    <header>
+      <h1>Objetivos</h1>
+      <span id="emisor" hx-swap="innerHTML" hx-trigger="load" hx-get="/infoUsuario/nombre" hx-target="this"></span>
+    </header>
+    <form id="agregar-objetivo-form">
+      <label for="nuevo-objetivo">Nuevo objetivo:</label>
+      <!-- <input type="text" id="nuevo-objetivo" name="nuevo-objetivo" autocomplete="off"> -->
+      <textarea required name="nuevo-objetivo" id="nuevo-objetivo"></textarea>
+      <br>
+      <label for="receptor">Para:</label>
+      <select id="receptor" hx-get="/optionEmpleados" hx-swap="innerHTML" hx-trigger="load" hx-target="this"></select>
+      <button id="agregar" type="button" hx-get="/listaObjetivos/pendientes" hx-swap="innerHTML" hx-trigger="click" hx-target="#pendientes">Agregar</button>
+    </form>
+    <button type="button" id="limpiar-objetivos">Limpiar</button>
+    
+    <h2>Objetivos completados</h2>
+    <div id="completados" hx-get="/listaObjetivos/completados" hx-swap="innerHTML" hx-trigger="load" hx-target="this">
+    </div>
+    
+    <h2>Objetivos pendientes</h2>
+    <div id="pendientes" hx-get="/listaObjetivos/pendientes" hx-swap="innerHTML" hx-trigger="load" hx-target="this">
+    </div>
+
+    <script>
+      const agregarBoton = document.getElementById('agregar');
+      const descripcionObjetivo = document.getElementById('nuevo-objetivo');
+      const receptorCodigo = document.getElementById('receptor');
+
+      function agregarObjetivo() {
+        const receptor = receptorCodigo.value;
+        const descripcion = descripcionObjetivo.value;
+
+        if (descripcion != '') {          
+          fetch(`/agregarObjetivos?receptor=${receptor}&descripcion=${descripcion}`)
+          .then(response => {
+            if (response.ok) {
+                descripcionObjetivo.value = '';
+                console.log('Todo ok! :)');
+              } else {
+                console.error('Error al agregar objetivo: ', response.statusText);
+              }
+            })
+            .catch(err => {
+              console.error(err);
+            });
+        }
+
+      }
+
+      agregarBoton.addEventListener('click', agregarObjetivo);
+
+      const limpiarObjetivosButton = document.getElementById('limpiar-objetivos');
+      limpiarObjetivosButton.addEventListener('click', function() {
+        descripcionObjetivo.value = '';
+      });    
+    </script>
+  </main>
+</body>
+</html>

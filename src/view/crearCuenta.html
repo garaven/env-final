@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+      span {
+        color: green;
+      }
+
+      main {
+        padding: 50px;
+      }
+    </style>
+  </head>
+  <body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+    <main>
+      <h1>Crear cuenta</h1>
+      <ul>
+        <li>
+          <input
+            hx-swap="innerHTML"
+            hx-get="/crearCuenta/empleado"
+            hx-trigger="click"
+            hx-target="#contenedor"
+            type="radio"
+            name="usuario"
+            id="empleado"
+          /><label for="empleado">Empleado</label>
+        </li>
+        <li>
+          <input
+            hx-swap="innerHTML"
+            hx-get="/crearCuenta/subgerente"
+            hx-trigger="click"
+            hx-target="#contenedor"
+            type="radio"
+            name="usuario"
+            id="subgerente"
+          /><label for="subgerente">Subgerente</label>
+        </li>
+        <li>
+          <input
+            hx-swap="innerHTML"
+            hx-get="/crearCuenta/gerente"
+            hx-trigger="click"
+            hx-target="#contenedor"
+            type="radio"
+            name="usuario"
+            id="gerente"
+          /><label for="gerente">Gerente</label>
+        </li>
+      </ul>
+  
+      <div id="contenedor">
+  
+      </div>
+    </main>
+  </body>
+</html>

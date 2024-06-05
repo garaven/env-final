@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      main {
+        padding: 50px;
+      }
+
+      main ul {
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      hx-get="/nav"
+      hx-trigger="load"
+      hx-swap="outerHTML"
+      hx-target="this"
+    ></div>
+
+    <main>
+      <ul>
+        <li>
+          <a href="/panel/actualizarDatos">Actualizar Datos</a>
+        </li>
+        <li>
+          <a href="/panel/desactivarCuenta">Desactivar / Activar Cuenta</a>
+        </li>
+        <li>
+          <a href="/panel/crearCuenta">Crear Cuenta</a>
+        </li>
+      </ul>
+    </main>
+  </body>
+</html>

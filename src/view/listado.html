@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Listado | Empleados</title>
+  <script src="https://unpkg.com/htmx.org/dist/htmx.min.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    td {
+      border: 1px solid #000;
+      padding: 5px;
+    }
+
+    main {
+      padding: 0 50px;
+    }
+
+    section li {
+      list-style: none;
+    }
+  </style>
+</head>
+<body>
+  <div hx-get="/nav" hx-trigger="load" hx-swap="outerHTML" hx-target="this"></div>
+
+  <main>
+    <header>
+      <h1>Listado General</h1>
+    </header>
+    <section>
+      <ul>
+        <li hx-get="/listadoGeneral" hx-swap="innerHTML" hx-target="#contenedor" hx-trigger="click">
+          <input name="tipo_usuario" type="radio" id="general" >
+          <label for="general">General</label>
+        </li>
+        <li hx-get="/listado/empleado" hx-swap="innerHTML" hx-target="#contenedor" hx-trigger="click">
+          <input name="tipo_usuario" type="radio" id="empleado">
+          <label for="empleado">Empleados</label>
+        </li>
+        <li hx-get="/listado/subgerente" hx-swap="innerHTML" hx-target="#contenedor" hx-trigger="click">
+          <input name="tipo_usuario" type="radio" id="subgerente">
+          <label for="subgerente">Subgerentes</label>
+        </li>
+        <li hx-get="/listado/gerente" hx-swap="innerHTML" hx-target="#contenedor" hx-trigger="click">
+          <input name="tipo_usuario" type="radio" id="gerente">
+          <label for="gerente">Gerentes</label>
+        </li>
+      </ul>
+      
+      <section>
+        <span>Filtros</span>
+        <button hx-get="/listadoActividad/activo" hx-target="#contenedor" hx-swap="innerHTML" hx-trigger="click">Cuentas activas</button>
+        <button hx-get="/listadoActividad/inactivo" hx-target="#contenedor" hx-swap="innerHTML" hx-trigger="click">Cuentas inactivas</button>
+        <br>
+        <span>Permisos</span>
+        <button hx-get="/listadoPermiso/cambio_contrasena" hx-target="#contenedor" hx-swap="innerHTML" hx-trigger="click">Cambio de contrasena</button>
+        <button hx-get="/listadoPermiso/desactivar_cuenta" hx-target="#contenedor" hx-swap="innerHTML" hx-trigger="click">Desactivar cuenta</button>
+        <button hx-get="/listadoPermiso/crear_cuenta" hx-target="#contenedor" hx-swap="innerHTML" hx-trigger="click">Crear cuenta</button>
+      </section>
+
+      <div id="contenedor"></div>
+
+    </section>
+  </main>
+</body>
+</html>
